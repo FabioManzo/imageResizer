@@ -1,0 +1,8 @@
+services:
+  php_8:
+    build: .
+    volumes:
+      - .:/var/www/html
+    ports:
+      - 8888:80
+    container_name: php_8
