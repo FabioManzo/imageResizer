@@ -6,6 +6,11 @@
             "ImageResizer\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Fabio Manzo"
@@ -17,5 +22,8 @@
     },
     "require": {
         "symfony/console": "^5.4"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit tests/"
     }
 }

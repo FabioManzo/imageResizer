@@ -33,6 +33,8 @@ class SimpleXmlParser implements ParserInterface {
             $strategy = TagProcessorFactory::create($tag);
             dump($strategy::class);
             $strategy->process($child, $config);
+            //if ($strategy::class === 'ImageResizer\Service\Processor\GroupProcessor')
+                //dd($config);
         }
         dd("sssss", $config);
         return $config;
