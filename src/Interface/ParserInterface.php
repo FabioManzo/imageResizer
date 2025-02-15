@@ -1,8 +1,9 @@
 <?php
 
-namespace ImageResizer\interfaces;
+namespace ImageResizer\Interface;
 
-interface XmlParserInterface {
+interface ParserInterface {
     public function load(string $filePath): void;
     public function getValue(string $xpath): mixed;
+    public function getAllValues(): mixed;
 }

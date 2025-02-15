@@ -4,7 +4,7 @@ namespace ImageResizer\services;
 
 use ImageResizer\interfaces\XmlParserInterface;
 
-class ConfigLoader {
+class ConfigLoaderTest {
     private XmlParserInterface $parser;
 
     public function __construct(XmlParserInterface $parser) {

@@ -1,0 +1,21 @@
+{
+    "name": "fabiomanzo/image-resizer",
+    "description": "A lightweight PHP application for image resizing based on an XML configuration file. It supports configurable parameters such as dimensions, cropping, filters, and caching to optimize performance.",
+    "autoload": {
+        "psr-4": {
+            "ImageResizer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Fabio Manzo"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "symfony/var-dumper": "^5.4"
+    },
+    "require": {
+        "symfony/console": "^5.4"
+    }
+}
