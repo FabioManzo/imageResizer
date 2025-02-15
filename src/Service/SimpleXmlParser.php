@@ -2,6 +2,7 @@
 
 namespace ImageResizer\Service;
 
+use ImageResizer\Factory\TagProcessorFactory;
 use ImageResizer\Interface\ParserInterface;
 
 class SimpleXmlParser implements ParserInterface {
@@ -24,24 +25,16 @@ class SimpleXmlParser implements ParserInterface {
     }
 
     public function getAllValues(): array {
-        $values = [];
-
-        // Iterate through elements and get values
+        $config = [];
         $namespace = $this->xml->getNamespaces(true);
-        $glzNamespace = $namespace['glz']; // Assuming 'glz' is the correct prefix
-
+        $glzNamespace = $namespace['glz'];
         foreach ($this->xml->children($glzNamespace) as $child) {
-            $values[$child->getName()] = (string) $child->ge;
+            $tag = $child->getName();
+            $strategy = TagProcessorFactory::create($tag);
+            dump($strategy::class);
+            $strategy->process($child, $config);
         }
-
-        // Iterate through attributes and get values
-        foreach ($this->xml->attributes() as $name => $value) {
-            dd($name, $value);
-            $values["@{$name}"] = (string) $value;
-        }
-
-        dd($values);
-
-        return $values;
+        dd("sssss", $config);
+        return $config;
     }
 }

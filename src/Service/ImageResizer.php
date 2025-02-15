@@ -12,7 +12,7 @@ class ImageResizer implements ImageResizeInterface
     public function resize(string $img, string $size): string
     {
 
-        print_r($this->config);
-        die;
+        //print_r($this->config);
+
     }
 }
