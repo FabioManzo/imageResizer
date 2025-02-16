@@ -42,8 +42,6 @@ class ResizeImageCommand extends Command
 
         $parser = $this->getParser($parserString);
         $config = new ConfigLoader($parser, $xmlFile);
-        die;
-        dd("FINALE", $config->getConfig());
         $imageResizer = new ImageResizer($config);
         $path = $imageResizer->resize($image, $size);
         $output->writeln("<info>Image resized and saved at: $path</info>");
