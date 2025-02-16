@@ -2,7 +2,10 @@
 
 namespace ImageResizer\Interface;
 
+use ImageResizer\Service\PathResolver\PathResolverInterface;
+
 interface ConfigLoaderInterface {
-    public function loadConfig(ParserInterface $parser, string $filePath): void;
-    public function getConfigValue(string $key): mixed;
+    public function getPath(): string;
+    public function load(ParserInterface $parser, string $fileName): void;
+    public function get(string $key, ?PathResolverInterface $pathResolver = null): mixed;
 }

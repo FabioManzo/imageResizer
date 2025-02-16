@@ -6,3 +6,5 @@ services:
     ports:
       - 8888:80
     container_name: php_8
+    env_file:
+      - .env

@@ -3,7 +3,7 @@
 namespace Test\Service\Processor;
 
 use PHPUnit\Framework\TestCase;
-use ImageResizer\Service\Processor\ParamProcessor;
+use ImageResizer\Service\Processor\SimpleXML\ParamProcessor;
 
 class ParamProcessorTest extends TestCase
 {
@@ -17,10 +17,10 @@ class ParamProcessorTest extends TestCase
         $method->setAccessible(true); // Allows calling private methods
 
         // Test cases
-        $this->assertSame(400, $method->invoke($processor, "400"));   // Int conversion
-        $this->assertSame(3.14, $method->invoke($processor, "3.14")); // Float conversion
-        $this->assertSame(true, $method->invoke($processor, "true")); // Boolean conversion
-        $this->assertSame(false, $method->invoke($processor, "false"));// Boolean conversion
-        $this->assertSame("hello", $method->invoke($processor, "hello")); // String remains string
+        $this->assertSame(400, $method->invoke($processor, "400"));
+        $this->assertSame(3.14, $method->invoke($processor, "3.14"));
+        $this->assertSame(true, $method->invoke($processor, "true"));
+        $this->assertSame(false, $method->invoke($processor, "false"));
+        $this->assertSame("hello", $method->invoke($processor, "hello"));
     }
 }

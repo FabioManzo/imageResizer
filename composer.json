@@ -21,7 +21,8 @@
         "symfony/var-dumper": "^5.4"
     },
     "require": {
-        "symfony/console": "^5.4"
+        "symfony/console": "^5.4",
+        "ext-simplexml": "*"
     },
     "scripts": {
         "test": "vendor/bin/phpunit tests/"

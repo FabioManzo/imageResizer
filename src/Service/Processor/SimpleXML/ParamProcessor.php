@@ -1,6 +1,6 @@
 <?php
 
-namespace ImageResizer\Service\Processor;
+namespace ImageResizer\Service\Processor\SimpleXML;
 
 class ParamProcessor implements TagProcessorInterface
 {

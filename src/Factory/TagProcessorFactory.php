@@ -2,17 +2,18 @@
 
 namespace ImageResizer\Factory;
 
-use ImageResizer\Service\Processor\GroupProcessor;
-use ImageResizer\Service\Processor\ImportProcessor;
-use ImageResizer\Service\Processor\ParamProcessor;
-use ImageResizer\Service\Processor\TagProcessorInterface;
+use ImageResizer\Enum\GlzTagEnum;
+use ImageResizer\Service\Processor\SimpleXML\GroupProcessor;
+use ImageResizer\Service\Processor\SimpleXML\ImportProcessor;
+use ImageResizer\Service\Processor\SimpleXML\ParamProcessor;
+use ImageResizer\Service\Processor\SimpleXML\TagProcessorInterface;
 
 class TagProcessorFactory {
     public static function create(string $tag): TagProcessorInterface {
         return match ($tag) {
-            'Import' => new ImportProcessor(),
-            'Group' => new GroupProcessor(),
-            'Param' => new ParamProcessor(),
+            GlzTagEnum::Import->name => new ImportProcessor(),
+            GlzTagEnum::Group->name => new GroupProcessor(),
+            GlzTagEnum::Param->name => new ParamProcessor(),
             default => throw new \InvalidArgumentException("Unknown tag type: $tag"),
         };
     }

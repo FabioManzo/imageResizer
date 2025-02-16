@@ -19,10 +19,10 @@ class SimpleXmlParser implements ParserInterface {
         }
     }
 
-    public function getValue(string $xpath): mixed {
+    /*public function getValue(string $xpath): mixed {
         $result = $this->xml->xpath($xpath);
         return $result ? (string) $result[0] : null;
-    }
+    }*/
 
     public function getAllValues(): array {
         $config = [];
@@ -31,12 +31,9 @@ class SimpleXmlParser implements ParserInterface {
         foreach ($this->xml->children($glzNamespace) as $child) {
             $tag = $child->getName();
             $strategy = TagProcessorFactory::create($tag);
-            dump($strategy::class);
             $strategy->process($child, $config);
-            //if ($strategy::class === 'ImageResizer\Service\Processor\GroupProcessor')
-                //dd($config);
         }
-        dd("sssss", $config);
+
         return $config;
     }
 }
