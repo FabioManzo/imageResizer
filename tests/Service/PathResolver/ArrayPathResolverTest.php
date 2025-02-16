@@ -21,7 +21,12 @@ class ArrayPathResolverTest extends TestCase
             "jpg_compression" => 90,
             "thumbnail" => [
                 "width" => 400,
-                "height" => 400
+                "height" => 400,
+                "crop" => false,
+                "filters" => [
+                    0 => "FlipHorizontal",
+                    1 => "BlackAndWhite"
+                ]
             ],
             "medium" => [
                 "width" => 400,
@@ -70,14 +75,14 @@ class ArrayPathResolverTest extends TestCase
             ["thumbnail/width", 400, false, AssertTypeEnum::Int],
             ["thumbnail/height", 400, false, AssertTypeEnum::Int],
             ["thumbnail/crop", false, false, AssertTypeEnum::Bool],
-            ["thumbnail/filters", ["FlipHorizontal", "BlackAndWhite"], false, "array"],
+            ["thumbnail/filters", ["FlipHorizontal", "BlackAndWhite"], false, AssertTypeEnum::Array],
             ["medium/width", 400, false, AssertTypeEnum::Int],
             ["medium/height", 400, false, AssertTypeEnum::Int],
             ["medium/crop", true, false, AssertTypeEnum::Bool],
             ["full/width", 800, false, AssertTypeEnum::Int],
             ["full/height", 600, false, AssertTypeEnum::Int],
             ["full/crop", false, false, AssertTypeEnum::Bool],
-            ["arrayvalue", ["abc", "def"] , false, "array"],
+            ["arrayvalue", ["abc", "def"] , false, AssertTypeEnum::Array],
             ["group/innergroup/value1", "abc", false, AssertTypeEnum::String],
             ["group/innergroup/value2", "def", false, AssertTypeEnum::String],
             ["longtext", "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Magna laus. Cave putes quicquam esse verius. Hoc etsi multimodis reprehendi potest, tamen accipio, quod dant. Duo Reges: constructio interrete. </p>", false, AssertTypeEnum::String],

@@ -4,7 +4,7 @@ namespace ImageResizer\Service\Processor\SimpleXML;
 
 class ParamProcessor implements TagProcessorInterface
 {
-    public function process(\SimpleXMLElement $element, array &$config): void {
+    public function process(\SimpleXMLElement $element, array $config): array {
         $attributes = array_values((array) $element->attributes())[0];
         $name = $attributes["name"];
         if (isset($attributes["value"])) {
@@ -17,6 +17,7 @@ class ParamProcessor implements TagProcessorInterface
         } else if ($name === 'longtext') {
             $config[$name] = trim((string) $element);
         }
+        return $config;
     }
 
     private function normalizeParamValue(mixed $value):mixed

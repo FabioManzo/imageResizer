@@ -31,7 +31,7 @@ class SimpleXmlParser implements ParserInterface {
         foreach ($this->xml->children($glzNamespace) as $child) {
             $tag = $child->getName();
             $strategy = TagProcessorFactory::create($tag);
-            $strategy->process($child, $config);
+            $config = $strategy->process($child, $config);
         }
 
         return $config;
