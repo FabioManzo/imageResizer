@@ -2,15 +2,19 @@
 
 namespace ImageResizer\Service;
 
+use ImageResizer\Factory\CacheFactory;
+use ImageResizer\Interface\CacheInterface;
 use ImageResizer\Interface\ImageEditingLibraryInterface;
 
 class GDlib implements ImageEditingLibraryInterface
 {
     private LoggerService $logger;
+    private CacheInterface $cache;
 
     public function __construct()
     {
         $this->logger = LoggerService::getInstance();
+        $this->cache = CacheFactory::create();
     }
 
     public function resize(
@@ -28,6 +32,13 @@ class GDlib implements ImageEditingLibraryInterface
         if (!$image) {
             throw new \RuntimeException("Failed to load image.");
         }
+
+        // Get the last modified time
+        $pathWithSize = $this->getPathWithSize($sourcePath, $cacheFolder, $size);
+        $lastModified = filemtime($pathWithSize);
+        $this->logger->info("Image last modified on: $lastModified");
+        // @TODO: Prendi il json dell'immagine, che come hash nomeFile + il timestamp di $lastModified
+        //$this->cache->get();
 
         $imageInfo = getimagesize($path);
         if ($imageInfo === false) {
@@ -118,11 +129,10 @@ class GDlib implements ImageEditingLibraryInterface
         };
     }
 
-    private function saveImageStrategy($image, string $sourcePath, string $cacheFolder, $size): string
+    private function saveImageStrategy($image, string $sourcePath, string $cacheFolder, string $size): string
     {
         $imageExtention = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
-        $imageName = pathinfo($sourcePath, PATHINFO_BASENAME);
-        $path = $cacheFolder . $size . "-" . $imageName;
+        $path = $this->getPathWithSize($sourcePath, $cacheFolder, $size);
         match ($imageExtention) {
             'jpg', 'jpeg' => \imagejpeg($image, $path),
             'gif' => \imagegif($image, $path),
@@ -130,5 +140,11 @@ class GDlib implements ImageEditingLibraryInterface
         };
 
         return $path;
+    }
+
+    private function getPathWithSize(string $sourcePath, string $cacheFolder, string $size)
+    {
+        $imageName = pathinfo($sourcePath, PATHINFO_BASENAME);
+        return $cacheFolder . $size . "-" . $imageName;
     }
 }

@@ -32,6 +32,7 @@ class FileCache implements CacheInterface {
             return null;
         }
         $this->logger->info("File {$key} found");
+        // @TODO: in caso di immagine, ritornare l'immagine e aggiungere anche il controllo se l'immagine esiste
         return $cachedData['value'];
     }
 
@@ -54,14 +55,5 @@ class FileCache implements CacheInterface {
     private function hash(string $content): string
     {
         return md5($content);
-    }
-
-    private function getPath(): string
-    {
-        $configPath = getenv('CONFIG_PATH');
-        if (!$configPath) {
-            throw new \RuntimeException('CONFIG_PATH environment variable is not set.');
-        }
-        return $configPath;
     }
 }
