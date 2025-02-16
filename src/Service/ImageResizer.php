@@ -26,6 +26,10 @@ class ImageResizer implements ImageResizeInterface
         }
         $archive = $this->config->get("archive");
         $cacheFolder = $this->config->get("imageCache");
-        return $this->imageEditingLibrary->resize($archive . $img, $sizeArr['width'], $sizeArr['height'], $cacheFolder);
+        $width = $sizeArr['width'] === "*" ? 0 : $sizeArr['width'];
+        $height = $sizeArr['height'] === "*" ? 0 : $sizeArr['height'];
+        $crop = $sizeArr['width'] === "*" || $sizeArr['height'] === "*" ? true : $sizeArr['crop'];
+        $filters = $sizeArr['filters'] ?? [];
+        return $this->imageEditingLibrary->resize($archive . $img, $width, $height, $crop, $cacheFolder, $size, $filters);
     }
 }
