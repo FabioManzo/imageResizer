@@ -3,6 +3,7 @@
 namespace ImageResizer\Command;
 
 use ImageResizer\Interface\ParserInterface;
+use ImageResizer\Service\FileCache;
 use ImageResizer\Service\ParserService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,6 +42,7 @@ class ResizeImageCommand extends Command
 
         $parser = $this->getParser($parserString);
         $config = new ConfigLoader($parser, $xmlFile);
+        die;
         dd("FINALE", $config->getConfig());
         $imageResizer = new ImageResizer($config);
         $path = $imageResizer->resize($image, $size);

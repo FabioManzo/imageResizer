@@ -9,7 +9,8 @@ use ImageResizer\Service\Processor\SimpleXML\ParamProcessor;
 use ImageResizer\Service\Processor\SimpleXML\TagProcessorInterface;
 
 class TagProcessorFactory {
-    public static function create(string $tag): TagProcessorInterface {
+    public static function create(string $tag): TagProcessorInterface
+    {
         return match ($tag) {
             GlzTagEnum::Import->name => new ImportProcessor(),
             GlzTagEnum::Group->name => new GroupProcessor(),

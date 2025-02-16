@@ -22,7 +22,8 @@
     },
     "require": {
         "symfony/console": "^5.4",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "monolog/monolog": "^3.8"
     },
     "scripts": {
         "test": "vendor/bin/phpunit tests/"

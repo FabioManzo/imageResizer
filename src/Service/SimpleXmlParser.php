@@ -8,7 +8,8 @@ use ImageResizer\Interface\ParserInterface;
 class SimpleXmlParser implements ParserInterface {
     private \SimpleXMLElement $xml;
 
-    public function load(string $filePath): void {
+    public function load(string $filePath): void
+    {
         if (!file_exists($filePath)) {
             throw new \InvalidArgumentException("File not found: $filePath");
         }
@@ -24,7 +25,8 @@ class SimpleXmlParser implements ParserInterface {
         return $result ? (string) $result[0] : null;
     }*/
 
-    public function getAllValues(): array {
+    public function getAllValues(): array
+    {
         $config = [];
         $namespace = $this->xml->getNamespaces(true);
         $glzNamespace = $namespace['glz'];
@@ -35,5 +37,10 @@ class SimpleXmlParser implements ParserInterface {
         }
 
         return $config;
+    }
+
+    public function getContent(): string
+    {
+        return $this->xml->asXML();
     }
 }
