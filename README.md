@@ -24,7 +24,7 @@ From within the PHP container, execute:
 # 📷 How to run the imageResizer
 The ImageResizer can be run with a bin/console command. From within the PHP container, execute:
 
-`bin/console image:resize Dark_Side_of_the_Moon.png  --xml myConfig.xml --size thumb`
+`bin/console image:resize Dark_Side_of_the_Moon.png  --xml myConfig.xml --size thumbnail`
 
 # ✅ How to run tests
 From within the PHP container, execute:
