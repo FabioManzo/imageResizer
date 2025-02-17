@@ -19,19 +19,20 @@ class FileCache implements CacheInterface {
     public function get(string $key, mixed $value): mixed
     {
         $filePath = $this->getFilePath($key);
+        dump($filePath);
         if (!file_exists($filePath)) {
-            $this->logger->info("File {$key} not found");
+            $this->logger->info("CACHE: File {$key} not found");
             return null;
         }
         $cachedContent = file_get_contents($filePath);
         $cachedData = json_decode($cachedContent, true);
         $hash = $this->hash($value);
         if ($cachedData['hash'] !== $hash) {
-            $this->logger->info("File {$key} found but with old content");
+            $this->logger->info("CACHE: File {$key} found but with old content");
             unlink($filePath); // Remove file with old content
             return null;
         }
-        $this->logger->info("File {$key} found");
+        $this->logger->info("CACHE: File {$key} found");
         // @TODO: in caso di immagine, ritornare l'immagine e aggiungere anche il controllo se l'immagine esiste
         return $cachedData['value'];
     }

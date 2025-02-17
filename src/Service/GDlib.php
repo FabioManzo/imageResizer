@@ -33,12 +33,36 @@ class GDlib implements ImageEditingLibraryInterface
             throw new \RuntimeException("Failed to load image.");
         }
 
-        // Get the last modified time
-        $pathWithSize = $this->getPathWithSize($sourcePath, $cacheFolder, $size);
-        $lastModified = filemtime($pathWithSize);
-        $this->logger->info("Image last modified on: $lastModified");
-        // @TODO: Prendi il json dell'immagine, che come hash nomeFile + il timestamp di $lastModified
-        //$this->cache->get();
+        /*
+        - controlla se a quel path /cache/thumbnail-Dark_Side_of_the_Moon.jpg esiste l'immagine
+            - se si,
+                - prendi il json che è stato scritto con il nome di quell'immagine in md5
+                - prendi la data di ultima modifica nel file e costruisci l'hash con nome-file + data del file trovato
+                    - se corrispondono
+                        - prendi l'immagine
+                    - se NON corrispondono:
+                        - genera un'altra immagine
+                        - genera un altro json con la nuova data
+            - se no,
+                - genera un'immagine
+                - genera un json con la nuova data
+        */
+        // Get the last modified time of the json corresponding to the image
+        $pathWithSizeCached = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
+        $lastModifiedCachedImage = file_exists($pathWithSizeCached) ? filemtime($pathWithSizeCached) : false;
+        if ($lastModifiedCachedImage) {
+            // The image exists in cache.
+            $this->logger->info("GDlib: Json of the image $pathWithSizeCached found");
+            // Read last modified time of the image from the corresponding json
+            $imageName = $this->getBaseName($sourcePath);
+            $imageFromCache = $this->cache->get($sourcePath, $imageName . $lastModifiedNewImage);
+            //$imagePathWithSize = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
+            dd("imagePathWithSize", $imagePathWithSize);
+            $imageLastModified = filemtime($imagePathWithSize);
+            dd($lastModified);
+            // @TODO: Prendi il json dell'immagine, che come hash nomeFile + il timestamp di $lastModified
+            //$this->cache->get();
+        }
 
         $imageInfo = getimagesize($path);
         if ($imageInfo === false) {
@@ -55,11 +79,11 @@ class GDlib implements ImageEditingLibraryInterface
         if ($newWidth === 0) {
             $ratio = $newHeight / $originalHeight;
             $newWidth = (int) round($originalWidth * $ratio);
-            $this->logger->info("Width is *. New calculated width: $newWidth");
+            $this->logger->info("GDlib: Width is *. New calculated width: $newWidth");
         } elseif ($newHeight === 0) {
             $ratio = $newWidth / $originalWidth;
             $newHeight = (int) round($originalHeight * $ratio);
-            $this->logger->info("Height is *. New calculated height: $newHeight");
+            $this->logger->info("GDlib: Height is *. New calculated height: $newHeight");
         }
 
         if ($crop) {
@@ -69,14 +93,14 @@ class GDlib implements ImageEditingLibraryInterface
             $cropHeight = (int) round($newHeight / $scale);
             $srcX = (int) round(($originalWidth - $cropWidth) / 2);
             $srcY = (int) round(($originalHeight - $cropHeight) / 2);
-            $this->logger->info("Crop is true. newWidth: $newWidth, newHeight: $newHeight, srcX: $srcX, srcXY: $srcX");
+            $this->logger->info("GDlib: Crop is true. newWidth: $newWidth, newHeight: $newHeight, srcX: $srcX, srcXY: $srcX");
         } else {
             // Adatta l'immagine senza crop
             $cropWidth = $originalWidth;
             $cropHeight = $originalHeight;
             $srcX = 0;
             $srcY = 0;
-            $this->logger->info("Crop is false. newWidth: $newWidth, newHeight: $newHeight, srcX: $srcX, srcXY: $srcX");
+            $this->logger->info("GDlib: Crop is false. newWidth: $newWidth, newHeight: $newHeight, srcX: $srcX, srcXY: $srcX");
         }
 
         // Create a new blank image with new dimensions
@@ -96,6 +120,11 @@ class GDlib implements ImageEditingLibraryInterface
         // Save resized image
         $savedPath = $this->saveImageStrategy($newImage, $sourcePath, $cacheFolder, $size);
 
+        $pathWithSize = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
+        $lastModifiedNewImage = filemtime($pathWithSize);
+        $imageName = $this->getBaseName($sourcePath);
+        $this->cache->set($imageName, $imageName, $imageName . $lastModifiedNewImage);
+
         // Free memory
         imagedestroy($image);
         imagedestroy($newImage);
@@ -114,7 +143,7 @@ class GDlib implements ImageEditingLibraryInterface
                     imageflip($image, IMG_FLIP_HORIZONTAL);
                     break;
                 default:
-                    $this->logger->info("Filter not recognized: $filter");
+                    $this->logger->info("GDlib: Filter not recognized: $filter");
             }
         }
     }
@@ -131,8 +160,8 @@ class GDlib implements ImageEditingLibraryInterface
 
     private function saveImageStrategy($image, string $sourcePath, string $cacheFolder, string $size): string
     {
+        $path = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
         $imageExtention = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
-        $path = $this->getPathWithSize($sourcePath, $cacheFolder, $size);
         match ($imageExtention) {
             'jpg', 'jpeg' => \imagejpeg($image, $path),
             'gif' => \imagegif($image, $path),
@@ -142,9 +171,19 @@ class GDlib implements ImageEditingLibraryInterface
         return $path;
     }
 
-    private function getPathWithSize(string $sourcePath, string $cacheFolder, string $size)
+    private function getPathWithSizeFromCache(string $sourcePath, string $cacheFolder, string $size, bool $getJsonExtention = false): string
     {
-        $imageName = pathinfo($sourcePath, PATHINFO_BASENAME);
+        $imageName = $this->getBaseName($sourcePath);
+        if ($getJsonExtention) {
+            $imageNameArr = explode(".", $imageName);
+            array_pop($imageNameArr);
+            $imageName = implode(".", $imageNameArr) . ".json";
+        }
         return $cacheFolder . $size . "-" . $imageName;
+    }
+
+    private function getBaseName(string $path): string
+    {
+        return pathinfo($path, PATHINFO_BASENAME);
     }
 }
