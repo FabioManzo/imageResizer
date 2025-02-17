@@ -3,15 +3,15 @@
 namespace ImageResizer\Factory;
 
 use ImageResizer\Interface\CacheInterface;
-use ImageResizer\Service\FileCache;
+use ImageResizer\Service\FileCacheManager;
 
 class CacheFactory {
-    public static function create(): ?CacheInterface
+    public static function create(string $namespace = ""): CacheInterface
     {
         $cashDriver = getenv('CACHE_DRIVER');
         return match ($cashDriver) {
-            'file'  => new FileCache(),
-            default => null,
+            'file'  => new FileCacheManager($namespace),
+            default => throw new \Exception("Cache Driver '{$cashDriver}' is not supported"),
         };
     }
 }

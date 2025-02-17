@@ -14,7 +14,8 @@ class GDlib implements ImageEditingLibraryInterface
     public function __construct()
     {
         $this->logger = LoggerService::getInstance();
-        $this->cache = CacheFactory::create();
+        $namespace = getenv('CACHE_IMAGES') ?? "";
+        $this->cache = CacheFactory::create($namespace);
     }
 
     public function resize(
@@ -32,6 +33,22 @@ class GDlib implements ImageEditingLibraryInterface
         if (!$image) {
             throw new \RuntimeException("Failed to load image.");
         }
+
+
+        /*
+        return $this->cacheManager->getCachedFile($sourcePath, 'jpg', function ($sourcePath, $cachePath) use ($width, $height) {
+            $image = imagecreatefromjpeg($sourcePath);
+            $resizedImage = imagescale($image, $width, $height);
+
+            imagejpeg($resizedImage, $cachePath, 90);
+            imagedestroy($image);
+            imagedestroy($resizedImage);
+        });
+        */
+
+
+
+
 
         /*
         - controlla se a quel path /cache/thumbnail-Dark_Side_of_the_Moon.jpg esiste l'immagine

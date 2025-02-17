@@ -24,7 +24,8 @@
         "symfony/console": "^5.4",
         "ext-simplexml": "*",
         "monolog/monolog": "^3.8",
-        "ext-gd": "*"
+        "ext-gd": "*",
+        "symfony/cache": "^6.4"
     },
     "scripts": {
         "test": "vendor/bin/phpunit tests/"

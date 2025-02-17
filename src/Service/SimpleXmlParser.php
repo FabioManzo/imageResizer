@@ -20,11 +20,6 @@ class SimpleXmlParser implements ParserInterface {
         }
     }
 
-    /*public function getValue(string $xpath): mixed {
-        $result = $this->xml->xpath($xpath);
-        return $result ? (string) $result[0] : null;
-    }*/
-
     public function getAllValues(): array
     {
         $config = [];

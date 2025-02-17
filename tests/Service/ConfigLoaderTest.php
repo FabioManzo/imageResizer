@@ -14,7 +14,6 @@ class ConfigLoaderTest extends TestCase
         $parserService = new ParserService();
         $parser = $parserService->getParser(ParserEnum::SimpleXmlParser->name);
         $configLoader = new ConfigLoader($parser, 'myConfig.xml');
-
         $config = $configLoader->getConfig();
 
         // Assert that all keys, from all the xml files, are present
