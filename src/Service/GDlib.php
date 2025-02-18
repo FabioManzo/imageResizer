@@ -8,14 +8,15 @@ use ImageResizer\Interface\ImageEditingLibraryInterface;
 
 class GDlib implements ImageEditingLibraryInterface
 {
-    private LoggerService $logger;
+    private string $namespace;
     private CacheInterface $cache;
+    private LoggerService $logger;
 
     public function __construct()
     {
         $this->logger = LoggerService::getInstance();
-        $namespace = getenv('CACHE_IMAGES') ?? "";
-        $this->cache = CacheFactory::create($namespace);
+        $this->namespace = getenv('CACHE_IMAGES') ?? "";
+        $this->cache = CacheFactory::create($this->namespace);
     }
 
     public function resize(
@@ -28,24 +29,13 @@ class GDlib implements ImageEditingLibraryInterface
         array $filters = []
     ): string
     {
-        $path = getenv('ASSETS_PATH') . $sourcePath;
-        $image = $this->loadImageStrategy($path);
-        if (!$image) {
-            throw new \RuntimeException("Failed to load image.");
-        }
-
-
-        /*
-        return $this->cacheManager->getCachedFile($sourcePath, 'jpg', function ($sourcePath, $cachePath) use ($width, $height) {
-            $image = imagecreatefromjpeg($sourcePath);
-            $resizedImage = imagescale($image, $width, $height);
-
-            imagejpeg($resizedImage, $cachePath, 90);
-            imagedestroy($image);
-            imagedestroy($resizedImage);
+        $savedPath = $this->cache->get($sourcePath, function ($sourcePath, $cachePath) use (
+            $newWidth, $newHeight, $crop, $cacheFolder, $size, $filters
+        ) {
+            $this->resizeLogic($newWidth, $newHeight, $crop, $cacheFolder, $size, $filters);
         });
-        */
 
+        return $savedPath;
 
 
 
@@ -65,7 +55,7 @@ class GDlib implements ImageEditingLibraryInterface
                 - genera un json con la nuova data
         */
         // Get the last modified time of the json corresponding to the image
-        $pathWithSizeCached = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
+        /*$pathWithSizeCached = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
         $lastModifiedCachedImage = file_exists($pathWithSizeCached) ? filemtime($pathWithSizeCached) : false;
         if ($lastModifiedCachedImage) {
             // The image exists in cache.
@@ -79,8 +69,42 @@ class GDlib implements ImageEditingLibraryInterface
             dd($lastModified);
             // @TODO: Prendi il json dell'immagine, che come hash nomeFile + il timestamp di $lastModified
             //$this->cache->get();
-        }
+        }*/
 
+
+    }
+
+    public function applyFilters($image, array $filters): void
+    {
+        foreach ($filters as $filter) {
+            switch ($filter) {
+                case 'BlackAndWhite':
+                    imagefilter($image, IMG_FILTER_GRAYSCALE);
+                    break;
+                case 'FlipHorizontal':
+                    imageflip($image, IMG_FLIP_HORIZONTAL);
+                    break;
+                default:
+                    $this->logger->info("GDlib: Filter not recognized: $filter");
+            }
+        }
+    }
+
+    private function resizeLogic(
+        string $sourcePath,
+        int $newWidth,
+        int $newHeight,
+        bool $crop,
+        string $cacheFolder,
+        string $size,
+        array $filters = []
+    )
+    {
+        $path = getenv('ASSETS_PATH') . $sourcePath;
+        $image = $this->loadImageStrategy($path);
+        if (!$image) {
+            throw new \RuntimeException("Failed to load image.");
+        }
         $imageInfo = getimagesize($path);
         if ($imageInfo === false) {
             throw new \RuntimeException("Invalid image file: $path");
@@ -96,11 +120,11 @@ class GDlib implements ImageEditingLibraryInterface
         if ($newWidth === 0) {
             $ratio = $newHeight / $originalHeight;
             $newWidth = (int) round($originalWidth * $ratio);
-            $this->logger->info("GDlib: Width is *. New calculated width: $newWidth");
+            $this->logger->info("GDlib: Width is $originalWidth. New calculated width: $newWidth");
         } elseif ($newHeight === 0) {
             $ratio = $newWidth / $originalWidth;
             $newHeight = (int) round($originalHeight * $ratio);
-            $this->logger->info("GDlib: Height is *. New calculated height: $newHeight");
+            $this->logger->info("GDlib: Height is $originalHeight. New calculated height: $newHeight");
         }
 
         if ($crop) {
@@ -140,7 +164,8 @@ class GDlib implements ImageEditingLibraryInterface
         $pathWithSize = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
         $lastModifiedNewImage = filemtime($pathWithSize);
         $imageName = $this->getBaseName($sourcePath);
-        $this->cache->set($imageName, $imageName, $imageName . $lastModifiedNewImage);
+
+        //$this->cache->set($imageName, $imageName, $imageName . $lastModifiedNewImage);
 
         // Free memory
         imagedestroy($image);
@@ -149,29 +174,14 @@ class GDlib implements ImageEditingLibraryInterface
         return $savedPath;
     }
 
-    public function applyFilters($image, array $filters): void
-    {
-        foreach ($filters as $filter) {
-            switch ($filter) {
-                case 'BlackAndWhite':
-                    imagefilter($image, IMG_FILTER_GRAYSCALE);
-                    break;
-                case 'FlipHorizontal':
-                    imageflip($image, IMG_FLIP_HORIZONTAL);
-                    break;
-                default:
-                    $this->logger->info("GDlib: Filter not recognized: $filter");
-            }
-        }
-    }
-
     private function loadImageStrategy(string $sourcePath)
     {
         $imageExtention = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
         return match ($imageExtention) {
             'jpg', 'jpeg' => \imagecreatefromjpeg($sourcePath),
             'gif' => \imagecreatefromgif($sourcePath),
-            'png' => \imagecreatefrompng($sourcePath)
+            'png' => \imagecreatefrompng($sourcePath),
+            default => throw new \InvalidArgumentException("File extention '$imageExtention' not supported")
         };
     }
 
@@ -182,7 +192,8 @@ class GDlib implements ImageEditingLibraryInterface
         match ($imageExtention) {
             'jpg', 'jpeg' => \imagejpeg($image, $path),
             'gif' => \imagegif($image, $path),
-            'png' => \imagepng($image, $path)
+            'png' => \imagepng($image, $path),
+            default => throw new \InvalidArgumentException("File extention '$imageExtention' not supported")
         };
 
         return $path;
@@ -196,7 +207,7 @@ class GDlib implements ImageEditingLibraryInterface
             array_pop($imageNameArr);
             $imageName = implode(".", $imageNameArr) . ".json";
         }
-        return $cacheFolder . $size . "-" . $imageName;
+        return $cacheFolder . $this->namespace . "/" . $size . "-" . $imageName;
     }
 
     private function getBaseName(string $path): string

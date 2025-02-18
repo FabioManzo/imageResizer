@@ -24,7 +24,7 @@ class ConfigLoader implements ConfigLoaderInterface {
 
     public function load(ParserInterface $parser, string $fileName): void
     {
-        $cachedFilePath = $this->cache->get($fileName, 'json', function ($sourcePath, $cachePath) use ($parser) {
+        $cachedFilePath = $this->cache->get($fileName, function ($sourcePath, $cachePath) use ($parser) {
             $this->logger->info("CONFIG_LOADER: Avvio parsing del file di configurazione '$sourcePath'");
             $parser->load($this->getPath() . $sourcePath);
             $this->configs = $parser->getAllValues();

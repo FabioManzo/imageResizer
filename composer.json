@@ -25,7 +25,8 @@
         "ext-simplexml": "*",
         "monolog/monolog": "^3.8",
         "ext-gd": "*",
-        "symfony/cache": "^6.4"
+        "symfony/cache": "^6.4",
+        "symfony/filesystem": "^7.2"
     },
     "scripts": {
         "test": "vendor/bin/phpunit tests/"

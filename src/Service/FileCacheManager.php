@@ -11,28 +11,29 @@ class FileCacheManager implements CacheInterface
     private string $cacheDir;
     private LoggerService $logger;
 
-    public function __construct(private string $namespace = "")
+    public function __construct(
+        private string $namespace = "",
+        ?LoggerService $logger = null
+    )
     {
         $this->cacheDir = getenv('CACHE_DIR');
         if (!is_dir($this->cacheDir)) {
             mkdir($this->cacheDir, 0777, true);
         }
-        $this->logger = LoggerService::getInstance();
+        $this->logger = $logger ?? LoggerService::getInstance();
         $this->cache = new FilesystemAdapter($this->namespace, 0, $this->cacheDir);
     }
 
-    public function get(string $sourcePath, string $extension, callable $generateCallback): string
+    public function get(string $sourcePath, callable $generateCallback): string
     {
         $cacheKey = md5($sourcePath);
         $sourcePathInConfigDir = getenv('CONFIG_PATH');
         $cacheItem = $this->cache->getItem($cacheKey);
-        $cachedFilePath = "{$this->cacheDir}/$this->namespace/{$cacheKey}.{$extension}";
-
+        $cachedFilePath = "{$this->cacheDir}/$this->namespace/{$cacheKey}.json";
         if ($cacheItem->isHit() && file_exists($cachedFilePath)) {
             $this->logger->info("FILE_CACHE: File di configurazione '$sourcePath' trovato");
             $cacheTimestamp = filemtime($cachedFilePath);
-            $sourceTimestamp = filemtime($sourcePathInConfigDir);
-
+            $sourceTimestamp = filemtime($sourcePathInConfigDir . $sourcePath);
             if ($cacheTimestamp >= $sourceTimestamp) {
                 $this->logger->info("FILE_CACHE: File di configurazione '$cachedFilePath' valido. Lo uso (File di partenza: '$sourcePath')");
                 return $cachedFilePath;
@@ -40,7 +41,7 @@ class FileCacheManager implements CacheInterface
             $this->logger->info("FILE_CACHE: File di configurazione '$sourcePath' NON valido. Lo rigenero");
         }
 
-        // File regeneration
+        // File regeneration delegated to the callback
         $generateCallback($sourcePath, $cachedFilePath);
 
         // Memorize file path in Symfony cache

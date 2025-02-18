@@ -4,5 +4,5 @@ namespace ImageResizer\Interface;
 
 interface CacheInterface
 {
-    public function get(string $sourcePath, string $extension, callable $generateCallback): string;
+    public function get(string $sourcePath, callable $generateCallback): string;
 }
