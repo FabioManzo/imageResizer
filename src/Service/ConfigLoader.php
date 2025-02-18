@@ -11,20 +11,21 @@ use ImageResizer\Service\PathResolver\PathResolverInterface;
 
 class ConfigLoader implements ConfigLoaderInterface {
     private array $configs = [];
+    private string $namespace;
     private CacheInterface $cache;
     private LoggerService $logger;
 
     public function __construct(private ParserInterface $parser, private string $filePath)
     {
-        $namespace = getenv('CACHE_CONFIG') ?? "";
-        $this->cache = CacheFactory::create($namespace);
+        $this->namespace = getenv('CACHE_CONFIG') ?? "";
+        $this->cache = CacheFactory::create($this->namespace);
         $this->logger = LoggerService::getInstance();
         $this->load($this->parser, $this->filePath);
     }
 
     public function load(ParserInterface $parser, string $fileName): void
     {
-        $cachedFilePath = $this->cache->get($fileName, function ($sourcePath, $cachePath) use ($parser) {
+        $cachedFilePath = $this->cache->get($fileName, "json", $this->namespace . "/", function ($sourcePath, $cachePath) use ($parser) {
             $this->logger->info("CONFIG_LOADER: Avvio parsing del file di configurazione '$sourcePath'");
             $parser->load($this->getPath() . $sourcePath);
             $this->configs = $parser->getAllValues();

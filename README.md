@@ -31,4 +31,4 @@ From within the PHP container, execute:
 
 `composer test` to run all the tests at once
 
-`composer test -- --filter testGet` to run a specific test (change "testGet" with the test you want to run)
+`vendor/bin/phpunit tests/ --filter testGet` to run a specific test (change "testGet" with the test you want to run)

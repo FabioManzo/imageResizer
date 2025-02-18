@@ -9,6 +9,7 @@ class FileCacheManager implements CacheInterface
 {
     private FilesystemAdapter $cache;
     private string $cacheDir;
+    private string $assetsDir;
     private LoggerService $logger;
 
     public function __construct(
@@ -17,6 +18,7 @@ class FileCacheManager implements CacheInterface
     )
     {
         $this->cacheDir = getenv('CACHE_DIR');
+        $this->assetsDir = getenv('ASSETS_PATH');
         if (!is_dir($this->cacheDir)) {
             mkdir($this->cacheDir, 0777, true);
         }
@@ -24,23 +26,22 @@ class FileCacheManager implements CacheInterface
         $this->cache = new FilesystemAdapter($this->namespace, 0, $this->cacheDir);
     }
 
-    public function get(string $sourcePath, callable $generateCallback): string
+    public function get(string $sourcePath, string $extension, string $sourceDir, callable $generateCallback): string
     {
         $cacheKey = md5($sourcePath);
-        $sourcePathInConfigDir = getenv('CONFIG_PATH');
         $cacheItem = $this->cache->getItem($cacheKey);
-        $cachedFilePath = "{$this->cacheDir}/$this->namespace/{$cacheKey}.json";
+        $cachedFilePath = "{$this->cacheDir}/$this->namespace/{$cacheKey}.$extension";
         if ($cacheItem->isHit() && file_exists($cachedFilePath)) {
-            $this->logger->info("FILE_CACHE: File di configurazione '$sourcePath' trovato");
+            $this->logger->info("FILE_CACHE: File '$sourcePath' trovato");
             $cacheTimestamp = filemtime($cachedFilePath);
-            $sourceTimestamp = filemtime($sourcePathInConfigDir . $sourcePath);
+            $completePath = $this->assetsDir . $sourceDir . "/" . $sourcePath;
+            $sourceTimestamp = filemtime($completePath);
             if ($cacheTimestamp >= $sourceTimestamp) {
-                $this->logger->info("FILE_CACHE: File di configurazione '$cachedFilePath' valido. Lo uso (File di partenza: '$sourcePath')");
+                $this->logger->info("FILE_CACHE: File '$cachedFilePath' valido. Lo uso (File di partenza: '$sourcePath')");
                 return $cachedFilePath;
             }
-            $this->logger->info("FILE_CACHE: File di configurazione '$sourcePath' NON valido. Lo rigenero");
+            $this->logger->info("FILE_CACHE: File '$sourcePath' NON valido. Lo rigenero");
         }
-
         // File regeneration delegated to the callback
         $generateCallback($sourcePath, $cachedFilePath);
 
