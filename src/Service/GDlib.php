@@ -23,6 +23,7 @@ class GDlib implements ImageEditingLibraryInterface
 
     public function resize(
         string $sourcePath,
+        string $archive,
         int $newWidth,
         int $newHeight,
         bool $crop,
@@ -31,11 +32,13 @@ class GDlib implements ImageEditingLibraryInterface
         array $filters = []
     ): string
     {
-        $savedPath = $this->cache->get($sourcePath, "", $this->archivePath, function ($sourcePath, $cachePath) use (
-            $newWidth, $newHeight, $crop, $cacheFolder, $size, $filters
+        $imageExtention = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
+        $savedPath = $this->cache->get($sourcePath, $imageExtention, $archive, function ($sourcePath, $cachePath) use (
+            $newWidth, $newHeight, $crop, $cacheFolder, $size, $filters, $archive
         ) {
-            return $this->resizeLogic($sourcePath, $newWidth, $newHeight, $crop, $cacheFolder, $size, $filters);
-        });
+            $this->logger->info("GDlib: Avvio resizing immagine '$sourcePath'");
+            return $this->resizeLogic($sourcePath, $archive, $newWidth, $newHeight, $crop, $cacheFolder, $size, $cachePath, $filters);
+        }, $size);
 
         return $savedPath;
     }
@@ -58,14 +61,16 @@ class GDlib implements ImageEditingLibraryInterface
 
     private function resizeLogic(
         string $sourcePath,
+        string $archive,
         int $newWidth,
         int $newHeight,
         bool $crop,
         string $cacheFolder,
         string $size,
-        array $filters = []
+        string $cachePath,
+        array $filters = [],
     ): string {
-        $path = getenv('ASSETS_PATH') . $sourcePath;
+        $path = getenv('ASSETS_PATH') . $archive . $sourcePath;
         $image = $this->loadImageStrategy($path);
         if (!$image) {
             throw new \RuntimeException("Failed to load image.");
@@ -91,7 +96,7 @@ class GDlib implements ImageEditingLibraryInterface
 
         $newImage = $this->resizeImageResource($image, $srcX, $srcY, $cropWidth, $cropHeight, $newWidthResult, $newHeightResult);
         $this->applyFilters($newImage, $filters);
-        return $this->saveImageStrategy($newImage, $sourcePath, $cacheFolder, $size);
+        return $this->saveImageStrategy($newImage, $sourcePath, $cacheFolder, $size, $cachePath);
     }
 
     private function calculateNewDimensions(
@@ -158,9 +163,9 @@ class GDlib implements ImageEditingLibraryInterface
     /**
      * Saves the image in cache
      */
-    private function saveImageStrategy(\GdImage $image, string $sourcePath, string $cacheFolder, string $size): string
+    private function saveImageStrategy(\GdImage $image, string $sourcePath, string $cacheFolder, string $size, string $cachePath): string
     {
-        $path = $this->getPathWithSizeFromCache($sourcePath, $cacheFolder, $size);
+        $path = $this->getPathWithSizeFromCache($cachePath, $cacheFolder, $size);
         $imageExtention = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
         match ($imageExtention) {
             'jpg', 'jpeg' => \imagejpeg($image, $path),
@@ -175,7 +180,7 @@ class GDlib implements ImageEditingLibraryInterface
     private function getPathWithSizeFromCache(string $sourcePath, string $cacheFolder, string $size): string
     {
         $imageName = $this->getBaseName($sourcePath);
-        return $cacheFolder . $this->namespace . "/" . $size . "-" . $imageName;
+        return $cacheFolder . $this->namespace . "/" . $imageName;
     }
 
     private function getBaseName(string $path): string

@@ -17,7 +17,7 @@ class SimpleXmlParserConfigLoaderTest extends TestCase
     {
         $parserService = new ParserService();
         $parser = $parserService->getParser(ParserEnum::SimpleXmlParser->name);
-        $configLoader = new ConfigLoader($parser, "myConfig.xml");
+        $configLoader = new ConfigLoader("myConfig.xml", $parser);
         $result = $configLoader->get($path);
         $this->assertEquals($expectedResult, $result);
         $this->assertType($result, $assertType);

@@ -26,18 +26,18 @@ class FileCacheManager implements CacheInterface
         $this->cache = new FilesystemAdapter($this->namespace, 0, $this->cacheDir);
     }
 
-    public function get(string $sourcePath, string $extension, string $sourceDir, callable $generateCallback): string
+    public function get(string $sourcePath, string $extension, string $sourceDir, callable $generateCallback, string $size = ""): string
     {
-        $cacheKey = md5($sourcePath);
+        $cacheKey = md5($size.$sourcePath);
         $cacheItem = $this->cache->getItem($cacheKey);
         $cachedFilePath = "{$this->cacheDir}/$this->namespace/{$cacheKey}.$extension";
         if ($cacheItem->isHit() && file_exists($cachedFilePath)) {
             $this->logger->info("FILE_CACHE: File '$sourcePath' trovato");
             $cacheTimestamp = filemtime($cachedFilePath);
-            $completePath = $this->assetsDir . $sourceDir . "/" . $sourcePath;
+            $completePath = $this->assetsDir . $sourceDir . $sourcePath;
             $sourceTimestamp = filemtime($completePath);
             if ($cacheTimestamp >= $sourceTimestamp) {
-                $this->logger->info("FILE_CACHE: File '$cachedFilePath' valido. Lo uso (File di partenza: '$sourcePath')");
+                $this->logger->info("FILE_CACHE: File '$cachedFilePath' valido. Lo uso (File di partenza: '$size.$sourcePath')");
                 return $cachedFilePath;
             }
             $this->logger->info("FILE_CACHE: File '$sourcePath' NON valido. Lo rigenero");
@@ -48,7 +48,6 @@ class FileCacheManager implements CacheInterface
         // Memorize file path in Symfony cache
         $cacheItem->set($cachedFilePath);
         $this->cache->save($cacheItem);
-
         return $cachedFilePath;
     }
 }

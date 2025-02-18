@@ -16,7 +16,7 @@ class ImportProcessor implements TagProcessorInterface
         }
         $parserService = new ParserService();
         $parser = $parserService->getParser(ParserEnum::SimpleXmlParser->name);
-        $configLoader = new ConfigLoader($parser, $src);
+        $configLoader = new ConfigLoader($src, $parser);
         $importedConfig = $configLoader->getConfig();
         $config = array_merge($config, $importedConfig);
 

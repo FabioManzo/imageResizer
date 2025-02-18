@@ -80,9 +80,10 @@ class GDlibTest extends TestCase
         $imagesPath = getenv('ASSETS_PATH') . "archive/";
         $cacheFolder = $this->cacheDirectory . "/";
         $sourcePath = $imagesPath . "Dark_Side_of_the_Moon.jpg";
+        $expectedCacheKey = md5($sourcePath) . ".jpg";
         $size = "thumbnail";
         $image = \imagecreatefromjpeg($sourcePath);
-        $pathWithSize = $saveImageStrategyReflection->invoke($gdLib, $image, $sourcePath, $cacheFolder, $size);
+        $pathWithSize = $saveImageStrategyReflection->invoke($gdLib, $image, $sourcePath, $cacheFolder, $size, $expectedCacheKey);
         $cachedImage = file_exists($pathWithSize);
         $this->assertTrue($cachedImage, 'Expected the cached image file to exist at ' . $pathWithSize);
     }

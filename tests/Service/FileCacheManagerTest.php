@@ -63,15 +63,14 @@ class FileCacheManagerTest extends TestCase
                 // Simulate file generation
                 file_put_contents($param2, json_encode(['mock' => 'data']));
             });
-
         // Execute the method with the mock callable
-        $pathGeneratedFromCallback = $fileManager->get($sourcePath, "json", "config", $mockCallable);
+        $pathGeneratedFromCallback = $fileManager->get($sourcePath, "json", "config/", $mockCallable);
 
         // Assert that get() returned the expected cache file path
         $this->assertSame($expectedCachedFilePath, $pathGeneratedFromCallback);
 
         // Mocked callable should not be called the second time if cached file is not expired
-        $cachedPathVal = $fileManager->get($sourcePath, "json", "config", $mockCallable);
+        $cachedPathVal = $fileManager->get($sourcePath, "json", "config/", $mockCallable);
 
         $this->assertSame($expectedCachedFilePath, $cachedPathVal);
     }
@@ -106,16 +105,16 @@ class FileCacheManagerTest extends TestCase
             });
 
         // Make the get method save the item in cache
-        $fileManager->get($sourcePath, "json", "config", $mockCallable);
+        $fileManager->get($sourcePath, "json", "config/", $mockCallable);
 
         // Simulate a file change (Cached file is older than the sourceFile $sourcePath) to trigger the regeneration
         touch($expectedCachedFilePath, strtotime('-1 year'));
 
         // The file is present in cache but it is older than the sourceFile, so the callback gets called again to generate it
-        $fileManager->get($sourcePath, "json", "config", $mockCallable);
+        $fileManager->get($sourcePath, "json", "config/", $mockCallable);
 
         // The file has been regenerated, so we have a cache hit and the callback does NOT get called a third time
-        $fileManager->get($sourcePath, "json", "config", $mockCallable);
+        $fileManager->get($sourcePath, "json", "config/", $mockCallable);
     }
 
     public function testGetCacheMissAndHitImage()
@@ -150,10 +149,10 @@ class FileCacheManagerTest extends TestCase
             });
 
         // Execute the method with the mock callable
-        $fileManager->get($sourcePath, $extension, "archive", $mockCallable);
+        $fileManager->get($sourcePath, $extension, "archive/", $mockCallable);
 
         // Mocked callable should not be called the second time if cached file is not expired
-        $cachedPathVal = $fileManager->get($sourcePath, $extension, "archive", $mockCallable);
+        $cachedPathVal = $fileManager->get($sourcePath, $extension, "archive/", $mockCallable);
         $this->assertSame($expectedCachedFilePath, $cachedPathVal);
     }
 

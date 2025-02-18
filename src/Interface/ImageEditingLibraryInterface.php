@@ -6,6 +6,7 @@ interface ImageEditingLibraryInterface
 {
     public function resize(
         string $sourcePath,
+        string $archive,
         int $newWidth,
         int $newHeight,
         bool $crop,

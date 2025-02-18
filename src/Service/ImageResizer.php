@@ -30,6 +30,6 @@ class ImageResizer implements ImageResizeInterface
         $height = $sizeArr['height'] === "*" ? 0 : $sizeArr['height'];
         $crop = $sizeArr['width'] === "*" || $sizeArr['height'] === "*" ? true : $sizeArr['crop'];
         $filters = $sizeArr['filters'] ?? [];
-        return $this->imageEditingLibrary->resize($archive . $img, $width, $height, $crop, $cacheFolder, $size, $filters);
+        return $this->imageEditingLibrary->resize($img, $archive, $width, $height, $crop, $cacheFolder, $size, $filters);
     }
 }

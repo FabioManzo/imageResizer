@@ -2,6 +2,7 @@
 
 namespace ImageResizer\Service;
 
+use ImageResizer\Enum\ParserEnum;
 use ImageResizer\Factory\CacheFactory;
 use ImageResizer\Interface\CacheInterface;
 use ImageResizer\Interface\ConfigLoaderInterface;
@@ -14,18 +15,20 @@ class ConfigLoader implements ConfigLoaderInterface {
     private string $namespace;
     private CacheInterface $cache;
     private LoggerService $logger;
+    private ParserInterface $parser;
 
-    public function __construct(private ParserInterface $parser, private string $filePath)
+    public function __construct(private string $filePath, ?ParserInterface $parser = null)
     {
         $this->namespace = getenv('CACHE_CONFIG') ?? "";
         $this->cache = CacheFactory::create($this->namespace);
         $this->logger = LoggerService::getInstance();
+        $this->parser = $parser ?? $this->getParser();
         $this->load($this->parser, $this->filePath);
     }
 
-    public function load(ParserInterface $parser, string $fileName): void
+    public function load(ParserInterface $parser, string $fileSourcePath): void
     {
-        $cachedFilePath = $this->cache->get($fileName, "json", $this->namespace . "/", function ($sourcePath, $cachePath) use ($parser) {
+        $cachedFilePath = $this->cache->get($fileSourcePath, "json", $this->namespace . "/", function ($sourcePath, $cachePath) use ($parser) {
             $this->logger->info("CONFIG_LOADER: Avvio parsing del file di configurazione '$sourcePath'");
             $parser->load($this->getPath() . $sourcePath);
             $this->configs = $parser->getAllValues();
@@ -57,5 +60,12 @@ class ConfigLoader implements ConfigLoaderInterface {
             throw new \RuntimeException('CONFIG_PATH environment variable is not set.');
         }
         return $configPath;
+    }
+
+    private function getParser(?string $parserString = null): ParserInterface
+    {
+        $parserService = new ParserService();
+        $parserString  = $parserString ?? ParserEnum::SimpleXmlParser->name;
+        return $parserService->getParser($parserString);
     }
 }
