@@ -81,7 +81,7 @@ class GDlib implements ImageEditingLibraryInterface
             throw new \RuntimeException("Unsupported image format: " . $imageInfo['mime']);
         }
 
-        list($cropWidth, $cropHeight, $srcX, $srcY, $newWidth, $newHeight) = $this->calculateNewDimensions(
+        list($cropWidth, $cropHeight, $srcX, $srcY, $newWidthResult, $newHeightResult) = $this->calculateNewDimensions(
             $imageInfo[0],
             $imageInfo[1],
             $newWidth,
@@ -89,9 +89,9 @@ class GDlib implements ImageEditingLibraryInterface
             $crop
         );
 
-        $newImage = $this->resizeImageResource($image, $srcX, $srcY, $cropWidth, $cropHeight, $newWidth, $newHeight);
+        $newImage = $this->resizeImageResource($image, $srcX, $srcY, $cropWidth, $cropHeight, $newWidthResult, $newHeightResult);
         $this->applyFilters($newImage, $filters);
-        return $this->saveImageStrategy($image, $sourcePath, $cacheFolder, $size);
+        return $this->saveImageStrategy($newImage, $sourcePath, $cacheFolder, $size);
     }
 
     private function calculateNewDimensions(
