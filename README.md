@@ -27,7 +27,7 @@ The ImageResizer can be run with a bin/console command. From within the PHP cont
 `bin/console image:resize Dark_Side_of_the_Moon.jpg  --xml myConfig.xml --size thumbnail`
 
 - The generated images go to the cache/images folder
-- The generated jsons go to the cache/config folder
+- The generated jsons go to the cache/config folder (cached xml content)
 
 
 # ✅ How to run tests
